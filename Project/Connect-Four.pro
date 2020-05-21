@@ -2,6 +2,7 @@
    G_Player := 1,
    G_Game_over := 0,
    G_Filled_squares := 0,
+   G_Last_move := 0,
    array(grid, 42, 0),
    window( title("Connect Four, Blue Player's turn"), size(500, 490), 
 	class(win_func), paint_indirectly).
@@ -71,6 +72,7 @@ draw_circles :-
 draw_circles.
 
 put_circle(Col) :-
+	G_Last_Move := Col,
 	for(I, 35, 0, Step(-7)),
 		grid(I+Col)=:=0,
 		grid(I+Col):=G_Player,
@@ -116,7 +118,17 @@ check_win:-
 
 think:-
 	repeat,
-		Col:=random(7),
+		% 2 out of 5 times AI will choose the same column as you
+		% 2 out of 5 times AI will choose a column next to yours
+		% 1 out of 5 times AI will choose a random column
+		T:=random(5),
+		((T=:=0;T=:=1) -> Col:=G_Last_Move else (
+			(T=:=2;T=:=3) -> (
+				(G_Last_Move=:=0, Col:=1);
+				(G_Last_Move=:=6, Col:=5);
+				(random(2)=:=0 -> Col:=G_Last_Move-1 else Col:=G_Last_Move+1)
+						) else (
+				Col:=random(7)
+		))),
 		(grid(Col)=\=0 -> fail else
 			(put_circle(Col), !)).
-	
